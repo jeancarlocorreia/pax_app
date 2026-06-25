@@ -28,16 +28,10 @@ Nesta fase de ideação e validação de interface, o app foi construído de for
 ## 🚀 Como visualizar
 
 O protótipo está hospedado via GitHub Pages e pode ser testado diretamente no link abaixo:
-**(Link do seu GitHub Pages vai aqui)**
+**(https://jeancarlocorreia.github.io/pax_app/)**
 
 ### Fluxo de Teste:
 1. Clique em "Simular GPS" para o sistema detectar em qual linha você está (simulação).
 2. Escolha o nível de lotação do ônibus.
 3. Se selecionar "Lotado", o sistema exigirá validações qualitativas extras (fundo do ônibus e pessoas em pé).
 4. Clique em "Enviar" para simular o recebimento do token PAX na sua carteira digital.
-
-## 👨‍💻 Próximos Passos (Roadmap GovTech)
-
-- [ ] Estruturação do Back-end em Python para cruzamento massivo dos arquivos `.json` da URBS (Tabela de Linha, Veículo e Horários).
-- [ ] Desenvolvimento do Dashboard do Gestor (CCO).
-- [ ] Definição da arquitetura blockchain para distribuição das recompensas e registro imutável dos dados.
