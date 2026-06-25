@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pax — Tela Mobile (DePIN)</title>
+
+    <!-- Tailwind CDN (protótipo) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              pax: {
+                bg: "#070712",
+                panel: "#0B0B1C",
+                stroke: "rgba(255,255,255,0.08)",
+                neon: "#A7FFEA",
+                neon2: "#7C3AED",
+                warn: "#FF4D7D",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* Pequenos ajustes “cyberpunk” sem depender de plugins */
+      .pax-grid {
+        background-image:
+          radial-gradient(1200px 700px at 20% -20%, rgba(124, 58, 237, 0.22), transparent 55%),
+          radial-gradient(900px 600px at 100% 0%, rgba(167, 255, 234, 0.16), transparent 60%),
+          radial-gradient(700px 500px at 35% 110%, rgba(255, 77, 125, 0.12), transparent 55%),
+          linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: auto, auto, auto, 28px 28px, 28px 28px;
+        background-position: center, center, center, center, center;
+      }
+
+      @keyframes paxPulse {
+        0%, 100% { transform: scale(1); opacity: 0.55; }
+        50% { transform: scale(1.25); opacity: 1; }
+      }
+      .pax-pulse {
+        animation: paxPulse 1.35s ease-in-out infinite;
+      }
+    </style>
+  </head>
+  <body class="min-h-dvh bg-pax-bg text-white pax-grid">
+    <div id="root"></div>
+
+    <!-- React 18 UMD (protótipo sem build) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <script>
+      const { useMemo, useState } = React;
+
+      function cx() {
+        return Array.from(arguments).filter(Boolean).join(" ");
+      }
+
+      function PillButton(props) {
+        const { active, tone, children, onClick, disabled } = props;
+        const toneMap = {
+          base: "border-pax-stroke bg-white/0 hover:bg-white/5",
+          neon: "border-pax-neon/30 hover:bg-pax-neon/10",
+          warn: "border-pax-warn/30 hover:bg-pax-warn/10",
+        };
+        return React.createElement(
+          "button",
+          {
+            type: "button",
+            disabled,
+            onClick,
+            className: cx(
+              "w-full select-none rounded-xl border px-3 py-2 text-sm transition",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+              toneMap[tone || "base"],
+              active && "bg-white/8 border-white/20"
+            ),
+          },
+          children
+        );
+      }
+
+      function ToggleChip(props) {
+        const { active, children, onClick } = props;
+        return React.createElement(
+          "button",
+          {
+            type: "button",
+            onClick,
+            className: cx(
+              "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs tracking-wide transition",
+              "border-pax-stroke bg-white/0 hover:bg-white/5",
+              active && "border-pax-neon/35 bg-pax-neon/10"
+            ),
+          },
+          children
+        );
+      }
+
+      function SectionTitle(props) {
+        return React.createElement(
+          "div",
+          { className: "mb-2 flex items-end justify-between gap-3" },
+          React.createElement(
+            "h2",
+            { className: "text-sm font-semibold tracking-wide text-white/90" },
+            props.children
+          ),
+          props.trailing
+        );
+      }
+
+      function PaxApp() {
+        const lines = useMemo(
+          () => ["Interbairros IV", "Campo Comprido / Capão Raso", "Fazendinha", "Interbairros V", "Cabral / Portão"],
+          []
+        );
+
+        const occupancyOptions = useMemo(
+          () => [
+            { id: "vazio", label: "Vazio", hint: "Assentos livres" },
+            { id: "baixo", label: "Baixa", hint: "Pouca gente" },
+            { id: "medio", label: "Média", hint: "Fluxo normal" },
+            { id: "cheio", label: "Cheio", hint: "Apertado" },
+            { id: "lotado", label: "Lotado", hint: "No limite" },
+          ],
+          []
+        );
+
+        const [detectedLine, setDetectedLine] = useState("Interbairros IV");
+        const [quickFilterOpen, setQuickFilterOpen] = useState(false);
+        const [occupancy, setOccupancy] = useState("");
+
+        const [backIsFull, setBackIsFull] = useState("");
+        const [standing, setStanding] = useState("");
+
+        const [toast, setToast] = useState("");
+        const [balance, setBalance] = useState(12.5);
+
+        const isLotado = occupancy === "lotado";
+        const canSubmit = useMemo(() => {
+          if (!occupancy) return false;
+          if (!isLotado) return true;
+          return Boolean(backIsFull) && Boolean(standing);
+        }, [occupancy, isLotado, backIsFull, standing]);
+
+        function simulateGpsDetect() {
+          const next = lines[Math.floor(Math.random() * lines.length)];
+          setDetectedLine(next);
+          setToast("GPS atualizou a linha detectada.");
+          window.clearTimeout(window.__paxToastTimer);
+          window.__paxToastTimer = window.setTimeout(() => setToast(""), 2400);
+        }
+
+        function onPickOccupancy(id) {
+          setOccupancy(id);
+          if (id !== "lotado") {
+            setBackIsFull("");
+            setStanding("");
+          }
+        }
+
+        function onSubmit() {
+          if (!canSubmit) return;
+          setBalance((prev) => prev + 0.5);
+          setToast("Enviado! Você ganhou 0.50 tokens PAX.");
+          window.clearTimeout(window.__paxToastTimer);
+          window.__paxToastTimer = window.setTimeout(() => setToast(""), 3200);
+        }
+
+        return React.createElement(
+          "div",
+          { className: "mx-auto min-h-dvh w-full max-w-[430px] px-4 pb-10 pt-5" },
+          React.createElement(
+            "header",
+            { className: "mb-4 flex items-center justify-between gap-4" },
+            React.createElement(
+              "div",
+              { className: "flex items-center gap-3" },
+              React.createElement(
+                "div",
+                { className: "relative grid h-11 w-11 place-items-center rounded-2xl border border-pax-stroke bg-pax-panel" },
+                React.createElement(
+                  "div",
+                  {
+                    className:
+                      "absolute inset-0 rounded-2xl ring-1 ring-inset ring-pax-neon/15",
+                  }
+                ),
+                React.createElement(
+                  "span",
+                  { className: "text-base font-semibold tracking-widest text-pax-neon" },
+                  "P"
+                )
+              ),
+              React.createElement(
+                "div",
+                null,
+                React.createElement(
+                  "div",
+                  { className: "text-lg font-semibold tracking-wide" },
+                  "Pax"
+                ),
+                React.createElement(
+                  "div",
+                  { className: "text-xs text-white/60" },
+                  "DePIN · Reporte de lotação (mobile)"
+                )
+              )
+            ),
+            React.createElement(
+              "button",
+              {
+                type: "button",
+                onClick: simulateGpsDetect,
+                className:
+                  "rounded-xl border border-pax-neon/25 bg-pax-neon/10 px-3 py-2 text-xs font-semibold tracking-wide text-pax-neon hover:bg-pax-neon/15 transition",
+              },
+              "Simular GPS"
+            )
+          ),
+
+          React.createElement(
+            "div",
+            { className: "mb-4 rounded-2xl border border-pax-stroke bg-pax-panel/90 p-4" },
+            React.createElement(
+              "div",
+              { className: "flex items-center justify-between gap-3" },
+              React.createElement(
+                "div",
+                null,
+                React.createElement(
+                  "div",
+                  { className: "text-xs text-white/60" },
+                  "Carteira"
+                ),
+                React.createElement(
+                  "div",
+                  { className: "mt-1 text-sm font-semibold tracking-wide text-white/90" },
+                  "Saldo PAX"
+                )
+              ),
+              React.createElement(
+                "div",
+                { className: "text-right" },
+                React.createElement(
+                  "div",
+                  { className: "text-2xl font-semibold tracking-wide text-pax-neon" },
+                  balance.toFixed(2)
+                ),
+                React.createElement(
+                  "div",
+                  { className: "text-xs text-white/55" },
+                  "tokens"
+                )
+              )
+            )
+          ),
+
+          React.createElement(
+            "div",
+            { className: "mb-4 rounded-2xl border border-pax-stroke bg-pax-panel/90 p-4" },
+            React.createElement(
+              "div",
+              { className: "flex items-start justify-between gap-3" },
+              React.createElement(
+                "div",
+                null,
+                React.createElement(
+                  "div",
+                  { className: "text-xs text-white/60" },
+                  "Detecção rápida (GPS)"
+                ),
+                React.createElement(
+                  "div",
+                  { className: "mt-1 flex items-center gap-2" },
+                  React.createElement("span", {
+                    className: "inline-block h-2 w-2 rounded-full bg-pax-neon pax-pulse",
+                    "aria-hidden": true,
+                  }),
+                  React.createElement(
+                    "div",
+                    { className: "text-base font-semibold tracking-wide" },
+                    detectedLine
+                  )
+                )
+              ),
+              React.createElement(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => setQuickFilterOpen((v) => !v),
+                  className:
+                    "rounded-xl border border-pax-stroke bg-white/0 px-3 py-2 text-xs text-white/80 hover:bg-white/5 transition",
+                },
+                quickFilterOpen ? "Fechar filtro" : "Filtro rápido"
+              )
+            ),
+
+            quickFilterOpen &&
+              React.createElement(
+                "div",
+                { className: "mt-4" },
+                React.createElement(
+                  "div",
+                  { className: "mb-2 text-xs text-white/60" },
+                  "Selecione uma linha detectada"
+                ),
+                React.createElement(
+                  "div",
+                  { className: "flex flex-wrap gap-2" },
+                  lines.map((name) =>
+                    React.createElement(
+                      ToggleChip,
+                      {
+                        key: name,
+                        active: detectedLine === name,
+                        onClick: () => setDetectedLine(name),
+                      },
+                      React.createElement(
+                        "span",
+                        { className: cx("h-1.5 w-1.5 rounded-full", detectedLine === name ? "bg-pax-neon" : "bg-white/30") }
+                      ),
+                      name
+                    )
+                  )
+                )
+              )
+          ),
+
+          React.createElement(
+            "div",
+            { className: "rounded-2xl border border-pax-stroke bg-pax-panel/90 p-4" },
+            React.createElement(SectionTitle, null, "Como está a lotação agora?"),
+            React.createElement(
+              "div",
+              { className: "grid grid-cols-2 gap-3" },
+              occupancyOptions.map((opt) =>
+                React.createElement(
+                  PillButton,
+                  {
+                    key: opt.id,
+                    active: occupancy === opt.id,
+                    tone: opt.id === "lotado" ? "warn" : opt.id === "cheio" ? "neon" : "base",
+                    onClick: () => onPickOccupancy(opt.id),
+                  },
+                  React.createElement(
+                    "div",
+                    { className: "flex items-center justify-between gap-3" },
+                    React.createElement(
+                      "div",
+                      null,
+                      React.createElement("div", { className: "font-semibold tracking-wide" }, opt.label),
+                      React.createElement("div", { className: "text-xs text-white/55" }, opt.hint)
+                    ),
+                    React.createElement(
+                      "div",
+                      {
+                        className: cx(
+                          "h-2.5 w-2.5 rounded-full",
+                          occupancy === opt.id
+                            ? opt.id === "lotado"
+                              ? "bg-pax-warn"
+                              : "bg-pax-neon"
+                            : "bg-white/20"
+                        ),
+                        "aria-hidden": true,
+                      }
+                    )
+                  )
+                )
+              )
+            ),
+
+            isLotado &&
+              React.createElement(
+                "div",
+                { className: "mt-4 rounded-2xl border border-pax-warn/25 bg-pax-warn/5 p-4" },
+                React.createElement(
+                  "div",
+                  { className: "mb-3 text-xs font-semibold tracking-wide text-pax-warn" },
+                  "Detalhes (quando Lotado)"
+                ),
+
+                React.createElement(
+                  "div",
+                  { className: "mb-4" },
+                  React.createElement(
+                    "div",
+                    { className: "mb-2 text-sm font-semibold text-white/90" },
+                    "O fundo do ônibus está cheio?"
+                  ),
+                  React.createElement(
+                    "div",
+                    { className: "grid grid-cols-2 gap-3" },
+                    ["Sim", "Não"].map((label) =>
+                      React.createElement(
+                        PillButton,
+                        {
+                          key: label,
+                          active: backIsFull === label,
+                          tone: "warn",
+                          onClick: () => setBackIsFull(label),
+                        },
+                        label
+                      )
+                    )
+                  )
+                ),
+
+                React.createElement(
+                  "div",
+                  null,
+                  React.createElement(
+                    "div",
+                    { className: "mb-2 text-sm font-semibold text-white/90" },
+                    "Quantidade de pessoas de pé"
+                  ),
+                  React.createElement(
+                    "div",
+                    { className: "grid grid-cols-2 gap-3" },
+                    ["+5", "+10", "+20", "Impossível contar"].map((label) =>
+                      React.createElement(
+                        PillButton,
+                        {
+                          key: label,
+                          active: standing === label,
+                          tone: "warn",
+                          onClick: () => setStanding(label),
+                        },
+                        label
+                      )
+                    )
+                  )
+                )
+              )
+          ),
+
+          React.createElement(
+            "div",
+            { className: "mt-4" },
+            React.createElement(
+              "button",
+              {
+                type: "button",
+                onClick: onSubmit,
+                disabled: !canSubmit,
+                className: cx(
+                  "w-full rounded-2xl border px-4 py-4 text-sm font-semibold tracking-wide transition",
+                  "border-pax-neon/30 bg-pax-neon/15 text-pax-neon hover:bg-pax-neon/20",
+                  "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-pax-neon/15"
+                ),
+              },
+              React.createElement(
+                "div",
+                { className: "flex items-center justify-between gap-3" },
+                React.createElement(
+                  "div",
+                  null,
+                  React.createElement("div", null, "Enviar e ganhar"),
+                  React.createElement("div", { className: "text-xs text-white/60 font-normal" }, "Recompensa instantânea on-chain")
+                ),
+                React.createElement(
+                  "div",
+                  { className: "rounded-xl border border-pax-neon/25 bg-black/20 px-3 py-2 text-xs" },
+                  React.createElement("span", { className: "text-white/70" }, "+"),
+                  React.createElement("span", { className: "ml-1 text-pax-neon font-semibold" }, "0.50"),
+                  React.createElement("span", { className: "ml-1 text-white/70" }, "PAX")
+                )
+              )
+            ),
+
+            React.createElement(
+              "div",
+              { className: "mt-3 text-center text-xs text-white/55" },
+              "Dica: para “Lotado”, responda as 2 perguntas para habilitar o envio."
+            )
+          ),
+
+          toast &&
+            React.createElement(
+              "div",
+              {
+                className:
+                  "fixed bottom-5 left-1/2 z-50 w-[min(430px,calc(100vw-2rem))] -translate-x-1/2",
+              },
+              React.createElement(
+                "div",
+                {
+                  className:
+                    "rounded-2xl border border-white/10 bg-black/70 px-4 py-3 text-xs text-white/90 backdrop-blur",
+                  role: "status",
+                  "aria-live": "polite",
+                },
+                toast
+              )
+            )
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(React.createElement(PaxApp));
+    </script>
+  </body>
+</html>
+
