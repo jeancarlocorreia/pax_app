@@ -1,22 +1,23 @@
 # Pax - Telemetria Humana para Mobilidade Urbana 🚌⚡
 
-Este repositório contém o protótipo funcional da interface mobile do **Pax**, uma solução de inteligência de dados construída sob o modelo **DePIN** (Decentralized Physical Infrastructure Network) focada em resolver a "cegueira situacional" do transporte público.
+Este repositório contém o protótipo funcional da interface mobile do **Pax**, uma solução GovTech de inteligência de dados construída sob o modelo **DePIN** (Decentralized Physical Infrastructure Network). O objetivo é resolver a "cegueira situacional" do transporte público, transformando o passageiro no principal sensor de dados da cidade em tempo real.
 
 ## ⚠️ O Problema
 
-O Centro de Controle Operacional (CCO) da prefeitura de Curitiba (URBS) possui um controle de ponta sobre a infraestrutura estática: 
-- Eles sabem exatamente onde o ônibus está (GPS).
-- Eles sabem se está atrasado (Tabela de Horários).
-- **Mas eles não sabem qual é a situação humana dentro do veículo em tempo real.**
+O Centro de Controle Operacional (CCO) da prefeitura (ex: URBS em Curitiba) possui um controle de ponta sobre a infraestrutura estática:
+- Eles sabem exatamente onde o ônibus está via GPS.
+- Eles sabem se o itinerário está no horário.
+- **Mas existe um ponto cego crítico: eles não sabem o que acontece com as pessoas lá dentro em tempo real**.
 
-A gestão depende de dados de catraca (que chegam com atraso) ou de pesquisas analógicas de amostragem. O resultado é a ineficiência: fiscais de terminal trabalhando no escuro e passageiros sofrendo com superlotação não mapeada.
+A gestão atual depende de dados de catraca, que registram embarques com defasagem e sem saber onde a pessoa desce. Outra dependência são as pesquisas anuais de satisfação por amostragem, como o QualiÔnibus. O resultado é a ineficiência: fiscais de terminal trabalhando às cegas e passageiros enfrentando viagens desconfortáveis e sem previsibilidade.
 
 ## 💡 A Solução (Pax)
 
-O Pax atua como uma camada paralela de inteligência de dados qualitativos. Nós transformamos o smartphone do cidadão em um sensor de infraestrutura, com dois pilares principais:
+O Pax evoluiu de um simples mapeador de superlotação para uma rede DePIN de telemetria da **experiência completa da viagem**. Nós transformamos o smartphone do cidadão em um sensor contínuo, estruturado em três pilares principais:
 
-1. **Coleta Gamificada e Tokenizada:** O cidadão relata o nível de lotação, conforto e gargalos nas portas do veículo. Para resolver o desafio da adesão (Cold Start), o usuário recebe uma micro-recompensa instantânea (tokens) a cada validação confirmada via geolocalização e consenso de outros passageiros.
-2. **Integração B2G:** Os dados gerados pelo app são cruzados com os arquivos abertos (JSON) da URBS. O painel do CCO passa a receber alertas dinâmicos de "Lotação Crítica", permitindo o envio rápido de carros de reforço e remanejamento operacional.
+1. **Telemetria da Experiência (Fricção Zero):** O reporte leva menos de 10 segundos e exige apenas 2 ou 3 toques intuitivos na tela. O usuário não apenas relata a lotação, mas avalia o conforto a bordo, a dirigibilidade, o funcionamento do ar-condicionado ou ruído e os gargalos de embarque e desembarque. O passageiro deixa de ser passivo e vira um auditor ativo da qualidade da cidade.
+2. **Coleta Gamificada e Antifraude:** O cidadão recebe uma micro-recompensa instantânea em tokens PAX a cada validação confirmada. Para evitar fraudes, o sistema utiliza mecanismos de *Proof of Location* (Prova de Localização), exigindo que o GPS do aparelho esteja dentro da cerca eletrônica (geofencing) do veículo em movimento. Além disso, um alerta só é classificado como confiável quando há convergência e algoritmo de consenso de múltiplos reportes concorrentes no mesmo carro.
+3. **Integração B2G (Business to Government):** Os dados gerados pelo aplicativo são cruzados com os arquivos abertos de telemetria e itinerários em formato JSON da URBS. O painel do CCO passa a receber alertas preditivos de saturação de linha e relatórios de conforto contínuos, permitindo o envio de ônibus de reforço e remanejamento operacional.
 
 ## 🛠️ Tecnologias Utilizadas (Protótipo)
 
@@ -28,10 +29,26 @@ Nesta fase de ideação e validação de interface, o app foi construído de for
 ## 🚀 Como visualizar
 
 O protótipo está hospedado via GitHub Pages e pode ser testado diretamente no link abaixo:
-**(https://jeancarlocorreia.github.io/pax_app/)**
+👉 **[Acessar Protótipo do Pax](https://jeancarlocorreia.github.io/pax_app/)**
 
-### Fluxo de Teste:
-1. Clique em "Simular GPS" para o sistema detectar em qual linha você está (simulação).
-2. Escolha o nível de lotação do ônibus.
-3. Se selecionar "Lotado", o sistema exigirá validações qualitativas extras (fundo do ônibus e pessoas em pé).
-4. Clique em "Enviar" para simular o recebimento do token PAX na sua carteira digital.
+### 📱 Fluxo de Teste Interativo
+
+Siga o passo a passo abaixo para simular a experiência completa do passageiro:
+
+1. **Detectar e Iniciar Viagem:** 
+   Na aba **"Detectar"**, clique em `Simular GPS` ou abra o filtro para selecionar a linha detectada (ex: *Interbairros IV*). Em seguida, clique em **Iniciar viagem**.
+
+2. **Avaliar Lotação:** 
+   O aplicativo mudará para a aba **"Viagem"**. Classifique o nível de ocupação atual do veículo selecionando entre: *Vazio, Baixa, Média, Cheio* ou *Lotado*.
+
+3. **Detalhamento Extra (Condicional):** 
+   Se a opção **Lotado** for selecionada, o sistema exigirá validações qualitativas adicionais. Responda se o fundo do ônibus está cheio e indique a quantidade estimada de pessoas em pé.
+
+4. **Reportar e Receber Recompensa:** 
+   Toque no botão **Reportar lotação** para enviar o status da viagem em tempo real ao painel de controle. Neste momento, o sistema simula o recebimento da sua primeira micro-recompensa na carteira digital (ex: `+ 0.25 PAX`).
+
+5. **Finalizar Trajeto:** 
+   Ao chegar ao seu destino e encerrar o trajeto físico, clique no botão vermelho **Descer** na seção inferior da tela.
+
+6. **Avaliar Experiência Geral:** 
+   Automaticamente, o app mudará para a aba **"Avaliar"**. Selecione os **Pontos positivos** (ex: *Ar condicionado, Limpo*) e os **Problemas** (ex: *Direção brusca, Superlotado*) enfrentados durante a jornada[cite: 11]. Por fim, clique em **Enviar avaliação** para confirmar sua auditoria e coletar a recompensa final on-chain (ex: `+ 0.50 PAX`)[cite: 8, 11].
