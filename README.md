@@ -45,10 +45,10 @@ Siga o passo a passo abaixo para simular a experiência completa do passageiro:
    Se a opção **Lotado** for selecionada, o sistema exigirá validações qualitativas adicionais. Responda se o fundo do ônibus está cheio e indique a quantidade estimada de pessoas em pé.
 
 4. **Reportar e Receber Recompensa:** 
-   Toque no botão **Reportar lotação** para enviar o status da viagem em tempo real ao painel de controle. Neste momento, o sistema simula o recebimento da sua primeira micro-recompensa na carteira digital (ex: `+ 0.25 PAX`).
+   Toque no botão **Reportar lotação** para enviar o status da viagem em tempo real ao painel de controle. Neste momento, o sistema simula o recebimento da sua primeira micro-recompensa na carteira digital.
 
 5. **Finalizar Trajeto:** 
    Ao chegar ao seu destino e encerrar o trajeto físico, clique no botão vermelho **Descer** na seção inferior da tela.
 
 6. **Avaliar Experiência Geral:** 
-   Automaticamente, o app mudará para a aba **"Avaliar"**. Selecione os **Pontos positivos** (ex: *Ar condicionado, Limpo*) e os **Problemas** (ex: *Direção brusca, Superlotado*) enfrentados durante a jornada[cite: 11]. Por fim, clique em **Enviar avaliação** para confirmar sua auditoria e coletar a recompensa final on-chain (ex: `+ 0.50 PAX`)[cite: 8, 11].
+   Automaticamente, o app mudará para a aba **"Avaliar"**. Selecione os **Pontos positivos** (ex: *Ar condicionado, Limpo*) e os **Problemas** (ex: *Direção brusca, Superlotado*) enfrentados durante a jornada. Por fim, clique em **Enviar avaliação** para confirmar sua auditoria e coletar a recompensa final on-chain (ex: `+ 0.50 PAX`).
